@@ -5,7 +5,10 @@
 @Author  : thezehui@gmail.com
 @File    : __init__.py.py
 """
-from .app_service import AppService
+from .document_service import DocumentService
+from .embedding_service import EmbeddingService
+from .parser_factory import ParserFactory
+from .agent_service import AgentService
 
 
-__all__ = ['AppService']
+__all__ = [ 'DocumentService', 'EmbeddingService', 'ParserFactory', 'AgentService']

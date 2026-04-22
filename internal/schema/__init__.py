@@ -6,5 +6,7 @@
 @File    : __init__.py.py
 """
 from .app_schema import CompletionReq
+from .document_schema import DocumentUploadReq
+from .agent_schema import AgentInvokeReq, AgentInvokeResp
 
-__all__ = ["CompletionReq"]
+__all__ = ["CompletionReq", "DocumentUploadReq", "AgentInvokeReq", "AgentInvokeResp"]

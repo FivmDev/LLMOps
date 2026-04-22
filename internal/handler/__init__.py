@@ -6,5 +6,7 @@
 @File    : __init__.py.py
 """
 from .app_handler import AppHandler
+from .document_handler import DocumentHandler
+from .agent_handler import AgentHandler
 
-__all__ = ["AppHandler"]
+__all__ = ["AppHandler", "DocumentHandler", "AgentHandler"]
