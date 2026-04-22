@@ -6,48 +6,32 @@
 @File    : app_handler.py
 """
 import uuid
-
-from openai import OpenAI
 import os
 from internal.schema import CompletionReq
 from pkg.response import success_json,validation_error_json,success_message
-from internal.service import AppService
 from injector import inject
 from dataclasses import dataclass
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
+from langchain_community.chat_message_histories import FileChatMessageHistory
+from langchain_core.runnables import Runnable,RunnablePassthrough,RunnableLambda
 
 @inject
 @dataclass
 class AppHandler:
     """APP应用控制器"""
-    app_service : AppService
-
-    def create_app(self):
-        app = self.app_service.create_app()
-        return success_message(f"应用创建成功，应用名称{app.name}")
-
-    def get_app(self,id : uuid.UUID):
-        app = self.app_service.get_app(id)
-        return success_message(f"应用查询成功，应用名称为{app.name}")
-
-    def delete_app(self,id : uuid.UUID):
-        app = self.app_service.delete_app(id)
-        return success_message("应用删除成功")
-
-    def update_app(self,id : uuid.UUID):
-        app = self.app_service.update_app(id)
-        return success_message(f"应用名称修改成功，修改后的应用名称为{app.name}")
-
     def completion(self):
         """与DeepSeek交互"""
         req = CompletionReq()
         if not req.validate():
             return validation_error_json(req.errors)
 
+        file_chat_history = FileChatMessageHistory(file_path="./storage/memory/history.txt")
+
         prompt = ChatPromptTemplate([
             ("system","You are a helpful assistant"),
+            MessagesPlaceholder("history"),
             ("human","{query}")
         ])
 
@@ -58,9 +42,15 @@ class AppHandler:
 
         parser = StrOutputParser()
 
-        chain = prompt | chat | parser
+        chain = (RunnablePassthrough.assign(history=RunnableLambda(lambda _ : file_chat_history.messages))
+                 | prompt
+                 | chat
+                 | parser)
 
         content = chain.invoke({"query":req.query.data})
+
+        file_chat_history.add_user_message(req.query.data)
+        file_chat_history.add_ai_message(content)
 
         return success_json({"content":content})
 

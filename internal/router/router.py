@@ -6,7 +6,9 @@
 @File    : router.py
 """
 from flask import Flask,Blueprint
-from internal.handler import AppHandler, app_handler
+from internal.handler import AppHandler
+from internal.router.document_router import DocumentRouter
+from internal.router.agent_router import AgentRouter
 from dataclasses import dataclass
 from injector import inject
 
@@ -15,6 +17,8 @@ from injector import inject
 class Router:
     """路由"""
     app_handler : AppHandler
+    document_router: DocumentRouter
+    agent_router: AgentRouter
 
     def register_routes(self, app: Flask):
         """注册路由"""
@@ -23,11 +27,12 @@ class Router:
 
         # 2. 将url与应用控制器相互绑定
         bp.add_url_rule("/ping",view_func=self.app_handler.ping)
-        bp.add_url_rule("/app/completion",methods=['POST'],view_func=self.app_handler.completion)
-        bp.add_url_rule("/app/create",methods=['POST'],view_func=self.app_handler.create_app)
-        bp.add_url_rule("/app/<uuid:id>",methods=['GET'],view_func=self.app_handler.get_app)
-        bp.add_url_rule("/app/<uuid:id>",methods=['POST'],view_func=self.app_handler.update_app)
-        bp.add_url_rule("/app/delete/<uuid:id>",methods=['POST'],view_func=self.app_handler.delete_app)
 
         # 3. 注册蓝图
         app.register_blueprint(bp)
+
+        # 4. 注册文档路由
+        self.document_router.register_routes(app)
+
+        # 5. 注册 Agent 路由
+        self.agent_router.register_routes(app)

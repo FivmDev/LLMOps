@@ -5,15 +5,16 @@
 @Author  : thezehui@gmail.com
 @File    : http_server.py
 """
+import os
+
 from flask import Flask
-from internal.router import Router
+
 from config import Config
 from internal.exception import CustomException
-from pkg.flask_sqlalchemy import SQLAlchemy
-from pkg.response import json,HttpResponse,HttpCode
-import os
-from internal.model import App
 from internal.extension.migrate import Migrate
+from internal.router import Router
+from pkg.flask_sqlalchemy import SQLAlchemy
+from pkg.response import json, HttpResponse, HttpCode
 
 
 class Http(Flask):
